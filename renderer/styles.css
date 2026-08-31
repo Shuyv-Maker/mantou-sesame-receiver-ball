@@ -1,0 +1,162 @@
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: transparent;
+  user-select: none;
+}
+
+body {
+  font-family: "Noto Sans SC", "Microsoft YaHei UI", sans-serif;
+}
+
+.receiver-ball {
+  position: relative;
+  display: grid;
+  width: 84px;
+  height: 84px;
+  margin: 2px;
+  overflow: hidden;
+  place-items: center;
+  cursor: grab;
+  border: 3px solid rgba(255, 255, 255, 0.96);
+  border-radius: 50%;
+  color: #ffffff;
+  background:
+    radial-gradient(circle at 31% 24%, rgba(255, 255, 255, 0.74) 0 5%, rgba(255, 255, 255, 0.16) 15%, transparent 30%),
+    linear-gradient(145deg, #75d4ff 0%, #4fa7ff 45%, #246bd3 100%);
+  box-shadow:
+    0 10px 24px rgba(22, 78, 142, 0.38),
+    inset 0 0 10px rgba(255, 255, 255, 0.46);
+  touch-action: none;
+  transition: transform 160ms ease, filter 160ms ease, box-shadow 160ms ease;
+}
+
+.receiver-ball:hover,
+.receiver-ball.is-dragover {
+  transform: scale(1.08);
+  filter: saturate(1.07);
+  box-shadow:
+    0 12px 28px rgba(22, 78, 142, 0.5),
+    0 0 0 4px rgba(229, 247, 255, 0.5),
+    inset 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.receiver-ball:active {
+  cursor: grabbing;
+}
+
+.receiver-ball.is-paired {
+  background:
+    radial-gradient(circle at 31% 24%, rgba(255, 255, 255, 0.74) 0 5%, rgba(255, 255, 255, 0.16) 15%, transparent 30%),
+    linear-gradient(145deg, #89d4bd 0%, #45a17f 47%, #236352 100%);
+}
+
+.receiver-ball.is-working {
+  animation: receiver-pulse 760ms ease-in-out infinite alternate;
+}
+
+.receiver-ball.is-error {
+  background:
+    radial-gradient(circle at 31% 24%, rgba(255, 255, 255, 0.74) 0 5%, rgba(255, 255, 255, 0.16) 15%, transparent 30%),
+    linear-gradient(145deg, #f58d7f 0%, #c95046 52%, #99322e 100%);
+}
+
+.receiver-glow {
+  position: absolute;
+  inset: -40%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.35), transparent 62%);
+  pointer-events: none;
+}
+
+.receiver-orbit {
+  position: absolute;
+  border: 1px dashed rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  opacity: 0.78;
+  pointer-events: none;
+}
+
+.orbit-one {
+  width: 64px;
+  height: 28px;
+  transform: rotate(-16deg);
+}
+
+.orbit-two {
+  width: 44px;
+  height: 68px;
+  transform: rotate(48deg);
+}
+
+.receiver-mark {
+  position: relative;
+  display: grid;
+  width: 25px;
+  height: 25px;
+  margin-top: -4px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.84);
+  border-radius: 50%;
+  font-size: 25px;
+  font-weight: 300;
+  line-height: 16px;
+  transform: rotate(0deg) translateY(-1px);
+}
+
+.receiver-state,
+.receiver-copy {
+  position: absolute;
+  z-index: 2;
+  width: 74px;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 3px rgba(20, 60, 100, 0.42);
+}
+
+.receiver-state {
+  top: 50px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.receiver-copy {
+  top: 64px;
+  font-size: 9px;
+  opacity: 0.93;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes receiver-pulse {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.07);
+  }
+}

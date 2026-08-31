@@ -1,0 +1,65 @@
+{
+  "name": "mantou-sesame-receiver-ball",
+  "version": "0.1.2",
+  "description": "馒头芝麻 Windows 独立收图球",
+  "private": true,
+  "main": "main.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "electron .",
+    "check": "node --check main.mjs && node --check bridge-server.mjs && node --check renderer/renderer.js && node --check preload.cjs",
+    "test:bridge": "node tests/bridge-transfer.mjs",
+    "package:dir": "electron-builder --win --dir",
+    "package:win": "electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "electron": "44.0.0",
+    "electron-builder": "26.8.1"
+  },
+  "dependencies": {
+    "ws": "8.19.0"
+  },
+  "build": {
+    "appId": "com.mantousesame.receiverball",
+    "productName": "馒头芝麻收图球",
+    "protocols": [
+      {
+        "name": "Mantou Sesame Receiver",
+        "schemes": [
+          "mantousesame"
+        ]
+      }
+    ],
+    "asar": true,
+    "asarUnpack": [],
+    "files": [
+      "main.mjs",
+      "preload.cjs",
+      "bridge-server.mjs",
+      "renderer/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "signAndEditExecutable": false,
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "Mantou-Sesame-Receiver-Ball-${version}-Setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "runAfterFinish": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "馒头芝麻收图球"
+    }
+  }
+}

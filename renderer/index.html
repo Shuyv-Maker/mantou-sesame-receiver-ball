@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>馒头芝麻收图球</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main
+      id="receiver-ball"
+      class="receiver-ball is-unpaired"
+      aria-label="馒头芝麻收图球：拖入图片即可保存到已连接的项目，右键打开菜单，双击查看连接帮助"
+      role="button"
+      tabindex="0"
+    >
+      <span class="receiver-glow" aria-hidden="true"></span>
+      <span class="receiver-orbit orbit-one" aria-hidden="true"></span>
+      <span class="receiver-orbit orbit-two" aria-hidden="true"></span>
+      <span class="receiver-mark" aria-hidden="true">⌄</span>
+      <span id="receiver-state" class="receiver-state">待连接</span>
+      <span id="receiver-copy" class="receiver-copy">网站自动连接</span>
+      <span id="receiver-live" class="sr-only" aria-live="polite"></span>
+    </main>
+    <script src="./renderer.js"></script>
+  </body>
+</html>

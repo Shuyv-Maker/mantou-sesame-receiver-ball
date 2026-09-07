@@ -26,6 +26,24 @@ let tray = null;
 let bridge = null;
 let isQuitting = false;
 let lastTransferError = "";
+let dragOffset = null;
+let dragTimer = null;
+let dragDeadline = 0;
+function endDrag() {
+  clearInterval(dragTimer);
+  dragTimer = null;
+  dragOffset = null;
+}
+function updateDrag() {
+  if (!dragOffset || !ballWindow || ballWindow.isDestroyed() || Date.now() > dragDeadline) { endDrag(); return; }
+  const cursor = screen.getCursorScreenPoint();
+  const x = Math.round(cursor.x - dragOffset.x), y = Math.round(cursor.y - dragOffset.y);
+  const current = ballWindow.getBounds();
+  if (current.x === x && current.y === y) return;
+  // Always supply fixed dimensions: setPosition alone can retain rounded
+  // Windows transparent-window bounds and inflate them on every DPI conversion.
+  ballWindow.setBounds({ x, y, width: BALL_SIZE, height: BALL_SIZE }, false);
+}
 
 function buildTrayIcon() {
   const svg = [
@@ -60,7 +78,7 @@ async function showPairingInstructions() {
   const status = bridge.getStatus();
   const message = status.paired
     ? "收图球已连接到「" + status.projectName + "」。\n\n如要换一个项目，请在网站中切换项目后点击「连接 Windows 收图球」。网站会自动改接，无需复制配对码。"
-    : "1. 打开「馒头芝麻」网站的「我的创作」。\n2. 点击「连接 Windows 收图球」。\n3. 网站会自动启动并连接小球，无需输入配对码。\n4. 连接成功后，把本地图片拖到蓝色小球上。\n\n如果自动连接失败，才使用下面的备用配对码：\n" + status.pairingCode;
+    : "1. 打开「馒头芝麻」网站的「我的创作」。\n2. 点击「连接 Windows 收图球」。\n3. 网站会自动启动并连接小球，无需输入配对码。\n4. 连接成功后，把本地图片拖到粒子小球上。\n\n如果自动连接失败，才使用下面的备用配对码：\n" + status.pairingCode;
 
   await dialog.showMessageBox(ballWindow || undefined, {
     type: "info",
@@ -84,7 +102,7 @@ function closeReceiver() {
 function showReceiverContextMenu() {
   const status = bridge?.getStatus();
   const connectionLabel = status?.paired
-    ? "已连接：" + status.projectName
+    ? (status.connected ? "已连接：" : "等待重连：") + status.projectName
     : "尚未连接网站项目";
   const menu = Menu.buildFromTemplate([
     { label: "馒头芝麻收图球", enabled: false },
@@ -121,7 +139,7 @@ function refreshTrayMenu() {
   if (!tray || !bridge) return;
   const status = bridge.getStatus();
   const connectionLabel = status.paired
-    ? "已连接：" + status.projectName
+    ? (status.connected ? "已连接：" : "等待重连：") + status.projectName
     : "未连接网站项目";
 
   tray.setContextMenu(Menu.buildFromTemplate([
@@ -162,6 +180,10 @@ function createBallWindow() {
   ballWindow = new BrowserWindow({
     width: BALL_SIZE,
     height: BALL_SIZE,
+    minWidth: BALL_SIZE,
+    minHeight: BALL_SIZE,
+    maxWidth: BALL_SIZE,
+    maxHeight: BALL_SIZE,
     x: workArea.x + workArea.width - BALL_SIZE - 28,
     y: workArea.y + workArea.height - BALL_SIZE - 38,
     frame: false,
@@ -191,6 +213,14 @@ function createBallWindow() {
   ballWindow.removeMenu();
   ballWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   ballWindow.webContents.on("will-navigate", (event) => event.preventDefault());
+  ballWindow.webContents.on("did-finish-load", () => {
+    ballWindow.webContents.setZoomFactor(1);
+    void ballWindow.webContents.setVisualZoomLevelLimits(1, 1);
+  });
+  ballWindow.webContents.on("before-input-event", (event, input) => {
+    if ((input.control || input.meta) && ["+", "-", "=", "0"].includes(input.key)) event.preventDefault();
+  });
+  ballWindow.on("blur", endDrag);
   ballWindow.loadFile(path.join(__dirname, "renderer", "index.html"));
   ballWindow.once("ready-to-show", () => {
     ballWindow?.showInactive();
@@ -205,6 +235,7 @@ function createBallWindow() {
     }
   });
   ballWindow.on("closed", () => {
+    endDrag();
     ballWindow = null;
   });
 }
@@ -212,12 +243,18 @@ function createBallWindow() {
 function installIpcHandlers() {
   ipcMain.handle("receiver:status", () => bridge?.getStatus() || null);
 
-  ipcMain.handle("receiver:move-by", (_event, rawX, rawY) => {
-    if (!ballWindow || ballWindow.isDestroyed()) return;
-    const deltaX = Math.max(-120, Math.min(120, Number(rawX) || 0));
-    const deltaY = Math.max(-120, Math.min(120, Number(rawY) || 0));
-    const [x, y] = ballWindow.getPosition();
-    ballWindow.setPosition(Math.round(x + deltaX), Math.round(y + deltaY), false);
+  ipcMain.on("receiver:drag", (event, phase, offset) => {
+    if (!ballWindow || event.sender !== ballWindow.webContents) return;
+    if (phase === 'end') { endDrag(); return; }
+    if (phase === 'start') {
+      endDrag();
+      if (!Number.isFinite(offset?.x) || !Number.isFinite(offset?.y)) return;
+      const zoom = ballWindow.webContents.getZoomFactor();
+      dragOffset = { x: offset.x * zoom, y: offset.y * zoom };
+      dragTimer = setInterval(updateDrag, 8);
+    }
+    dragDeadline = Date.now() + 1500;
+    updateDrag();
   });
 
   ipcMain.handle("receiver:show-pairing", async () => {
@@ -331,6 +368,7 @@ if (!singleInstance) {
   });
 
   app.on("before-quit", () => {
+    endDrag();
     isQuitting = true;
     void bridge?.stop();
   });

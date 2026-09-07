@@ -1,13 +1,14 @@
 {
   "name": "mantou-sesame-receiver-ball",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "description": "馒头芝麻 Windows 独立收图球",
   "private": true,
   "main": "main.mjs",
   "type": "module",
   "scripts": {
     "start": "electron .",
-    "check": "node --check main.mjs && node --check bridge-server.mjs && node --check renderer/renderer.js && node --check preload.cjs",
+    "check": "node --check main.mjs && node --check bridge-server.mjs && node --check renderer/renderer.js && node --check renderer/orb.js && node --check preload.cjs",
+    "test:orb": "electron tests/orb-e2e.cjs",
     "test:bridge": "node tests/bridge-transfer.mjs",
     "package:dir": "electron-builder --win --dir",
     "package:win": "electron-builder --win nsis"
@@ -17,6 +18,8 @@
     "electron-builder": "26.8.1"
   },
   "dependencies": {
+    "react": "18.3.1",
+    "thinking-orbs": "0.3.1",
     "ws": "8.19.0"
   },
   "build": {
@@ -37,6 +40,7 @@
       "preload.cjs",
       "bridge-server.mjs",
       "renderer/**/*",
+      "THIRD_PARTY_NOTICES.md",
       "package.json"
     ],
     "directories": {

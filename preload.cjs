@@ -15,7 +15,7 @@ async function toFileRecord(file) {
 
 contextBridge.exposeInMainWorld("mantouReceiver", {
   getStatus: () => ipcRenderer.invoke("receiver:status"),
-  moveBy: (x, y) => ipcRenderer.invoke("receiver:move-by", x, y),
+  drag: (phase, offset) => ipcRenderer.send("receiver:drag", phase, offset),
   showPairing: () => ipcRenderer.invoke("receiver:show-pairing"),
   showContextMenu: () => ipcRenderer.invoke("receiver:show-context-menu"),
   ingestFile: async (file) => ipcRenderer.invoke(

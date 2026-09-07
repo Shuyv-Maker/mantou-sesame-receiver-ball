@@ -14,14 +14,12 @@
       role="button"
       tabindex="0"
     >
-      <span class="receiver-glow" aria-hidden="true"></span>
-      <span class="receiver-orbit orbit-one" aria-hidden="true"></span>
-      <span class="receiver-orbit orbit-two" aria-hidden="true"></span>
-      <span class="receiver-mark" aria-hidden="true">⌄</span>
-      <span id="receiver-state" class="receiver-state">待连接</span>
-      <span id="receiver-copy" class="receiver-copy">网站自动连接</span>
+      <canvas id="receiver-orb" width="128" height="128" aria-hidden="true"></canvas>
+      <span class="receiver-badge" aria-hidden="true"></span>
+      <span id="receiver-state" class="sr-only">待连接</span>
+      <span id="receiver-copy" class="sr-only">网站自动连接</span>
       <span id="receiver-live" class="sr-only" aria-live="polite"></span>
     </main>
-    <script src="./renderer.js"></script>
+    <script type="module" src="./renderer.js"></script>
   </body>
 </html>
